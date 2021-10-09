@@ -1,36 +1,26 @@
-import React from 'react';
 import './ContactList.css';
+import React from 'react';
 import * as contactsActions from '../redux/contacts/contacts-actions';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { getVisibleContacts } from '../redux/contacts/contacts-selectors';
 
-const ContactList = ({ contacts, onDeleteContact }) => (
-  <ul className="contacts__list">
-    {contacts.map(({ name, number, id }) => (
-      <li className="contacts__item" key={id}>
-        <p className="contacts__name">{name}</p>
-        <p className="contacts__number">{number}</p>
-        <button className="contacts__btn" onClick={() => onDeleteContact(id)}>
-          Delete
-        </button>
-      </li>
-    ))}
-  </ul>
-);
+export default function ContactList() {
+  const contacts = useSelector(getVisibleContacts);
+  const dispatch = useDispatch();
 
-const getVisibleContacts = (allContacts, filter) => {
-  const normalizedFilter = filter.toLowerCase();
-  return allContacts.filter(({ name }) =>
-    name.toLowerCase().includes(normalizedFilter),
+  const onDeleteContact = id => dispatch(contactsActions.deleteContact(id));
+
+  return (
+    <ul className="contacts__list">
+      {contacts.map(({ name, number, id }) => (
+        <li className="contacts__item" key={id}>
+          <p className="contacts__name">{name}</p>
+          <p className="contacts__number">{number}</p>
+          <button className="contacts__btn" onClick={() => onDeleteContact(id)}>
+            Delete
+          </button>
+        </li>
+      ))}
+    </ul>
   );
-};
-
-const mapStateToProps = ({ contacts: { items, filter } }) => ({
-  contacts: getVisibleContacts(items, filter),
-});
-
-const mapDispatchToProps = dispatch => ({
-  onDeleteContact: id => dispatch(contactsActions.deleteContact(id)),
-  onChangeFilter: () => dispatch(contactsActions.changeFilter()),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(ContactList);
+}

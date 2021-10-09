@@ -1,33 +1,41 @@
-import { combineReducers, createStore } from 'redux';
-import { composeWithDevTools } from 'redux-devtools-extension';
+import { configureStore } from '@reduxjs/toolkit';
 import contactsReducer from './contacts/contacts-reducer';
+import {
+  persistStore,
+  persistReducer,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from 'redux-persist';
+import logger from 'redux-logger';
+import storage from 'redux-persist/lib/storage';
 
-const rootReducer = combineReducers({
-  contacts: contactsReducer,
+const contactsPersistConfig = {
+  key: 'contacts',
+  storage,
+  blacklist: ['filter'],
+};
+
+const middleware = getDefaultMiddleware => [
+  ...getDefaultMiddleware({
+    serializableCheck: {
+      ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+    },
+  }),
+  logger,
+];
+
+const store = configureStore({
+  reducer: {
+    contacts: persistReducer(contactsPersistConfig, contactsReducer),
+  },
+  middleware,
+  devTools: process.env.NODE_ENV === 'development',
 });
 
-const store = createStore(rootReducer, composeWithDevTools());
+const persistor = persistStore(store);
 
-export default store;
-
-// Телефонная книга
-// Выполни рефакторинг кода приложения «Телефонная книга» добавив управление состоянием при помощи библиотеки Redux.
-
-// Пусть Redux-состояние выглядит следующим образом.
-
-// {
-//   contacts: {
-//     items: [],
-//     filter: ''
-//   }
-// }
-// Шаг 1
-// Используй только возможности библиотеки Redux (без redux-toolkit).
-
-// Создай хранилище и добавь инструменты разработчика
-// Создай действия (actions) сохранения и удаления контакта, а также обновления фильтра.
-// Вынеси типы действий в отдельный файл констант.
-// Создай редюсеры контактов и фильтра.
-// Свяжи React-компоненты с Redux-логикой при помощи бибилиотеки react-redux.
-// Шаг 2
-// Выполни рефакторинг кода и сократи Redux-бойлерплейт используя библиотеку Redux Tookit. Используй функции configureStore(), createAction() и createReducer().
+export { store, persistor };
