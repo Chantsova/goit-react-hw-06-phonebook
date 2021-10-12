@@ -26,17 +26,19 @@ export default function ContactForm() {
       case 'number':
         setNumber(value);
         break;
+
       default:
         return;
     }
   };
 
   const handleSubmit = e => {
+    e.preventDefault();
     const found = contacts.find(
       contact => contact.name.toLowerCase() === name.toLowerCase(),
     );
+
     if (found === undefined) {
-      e.preventDefault();
       dispatch(contactsActions.addContact({ name, number }));
       reset();
     } else {
